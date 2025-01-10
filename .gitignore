@@ -1,0 +1,9 @@
+# environment variable
+.env
+.env.local
+
+/node_modules
+package-lock.json
+
+# Firebase service account key file
+admin.json
