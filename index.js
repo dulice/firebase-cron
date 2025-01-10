@@ -4,8 +4,9 @@ dotenv.config();
 import express from "express";
 import corn from "node-cron";
 import cors from "cors";
-import { createWinner, drawLottery } from "./firebase-admin.js";
+import { drawLottery } from "./firebase-admin.js";
 import { lotteryTime } from "./constants.js";
+import router from "./route.js";
 
 const app = express();
 app.use(cors());
@@ -26,18 +27,7 @@ corn.schedule("0 12 28-31 * *", async () => {
   }
 });
 
-corn.schedule("* * * * *", async () => {
-  try {
-    console.log("running every minute");
-    await createWinner({
-      number: "99",
-      created_at: Date.now(),
-      users: [],
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
+app.use("/", router);
 
 app.use("*", (req, res) => {
   res.send("hello");
