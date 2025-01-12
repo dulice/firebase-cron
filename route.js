@@ -1,19 +1,12 @@
 import express from "express";
-import { createWinner, drawLottery } from "./firebase-admin.js";
+import { drawLottery, sendNotification } from "./firebase-admin.js";
 import { lotteryTime } from "./constants.js";
 const router = express.Router();
 
-router.get("/cron", async (req, res) => {
-  try {
-    const data = await createWinner({
-      number: "99",
-      created_at: Date.now(),
-      users: [],
-    });
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json(error);
-  }
+router.post("/noti", async (req, res) => {
+  const { pushToken, number } = req.body;
+  const data = sendNotification(pushToken, number);
+  return res.status(200).json(data);
 });
 
 router.get("/cron-lottery", async (req, res) => {
@@ -31,4 +24,5 @@ router.get("/cron-lottery", async (req, res) => {
     res.send(500).json(error);
   }
 });
+
 export default router;

@@ -12,11 +12,13 @@
   "type": "module",
   "description": "",
   "dependencies": {
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "expo-server-sdk": "^3.13.0",
     "express": "^4.21.2",
-    "firebase": "^11.1.0",
     "firebase-admin": "^13.0.2",
+    "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3"
   },
   "devDependencies": {

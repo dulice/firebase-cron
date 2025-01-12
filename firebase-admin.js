@@ -7,12 +7,37 @@ import {
   lotteryTime,
   randomNumberFormat,
 } from "./constants.js";
+import { Expo } from "expo-server-sdk";
 
+const expo = new Expo();
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-const firebase = firebase_admin.initializeApp({
+export const firebase = firebase_admin.initializeApp({
   credential: firebase_admin.credential.cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
+
 export const db = getFirestore(firebase);
+
+export const sendNotification = (pushToken, lotteryNumber) => {
+  expo.sendPushNotificationsAsync([
+    {
+      to: pushToken,
+      title: "Congratulations!",
+      body: `Your lottery number is ${lotteryNumber}. You Won the Lottery!`,
+      sound: "default",
+    },
+  ]);
+};
+
+export const getUser = async (id) => {
+  try {
+    const docRef = db.collection(collectionPath.USERS).doc(id);
+    const docSnap = await docRef.get();
+    return docSnap.data();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 export const getlastWinner = async () => {
   try {
@@ -88,10 +113,10 @@ export const drawLottery = async () => {
       const winners = await generateWinners(winner[0].number);
       console.log("update");
       await updateWinner({ users: winners }, winner[0].id);
-      // winners?.forEach(async (winnerId) => {
-      //   const user = await getUser(winnerId);
-      //   await sendNotification(user!, winner[0].number);
-      // });
+      winners?.forEach(async (winnerId) => {
+        const user = await getUser(winnerId);
+        sendNotification(user.pushToken, winner[0].number);
+      });
     } else {
       console.log("create");
       const winningNumber = randomNumberFormat();
@@ -101,10 +126,10 @@ export const drawLottery = async () => {
         number: winningNumber,
         created_at: Timestamp.fromDate(lotteryDate),
       });
-      // winners?.forEach(async (winnerId) => {
-      //   const user = await getUser(winnerId);
-      //   await sendNotification(user, winner[0].number);
-      // });
+      winners?.forEach(async (winnerId) => {
+        const user = await getUser(winnerId);
+        sendNotification(user.pushToken, winner[0].number);
+      });
     }
   }
 };
